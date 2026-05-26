@@ -1,0 +1,24 @@
+venv/
+__pycache__/
+*.pyc
+build/
+dist/
+TGTunnel.spec
+.buildozer/
+bin/
+.pytest_cache/
+
+# Local tooling / SDK (reinstall via scripts)
+.tools/
+.android-sdk/
+
+# Logs and IDE
+logs/
+*.log
+.idea/
+
+# Android Gradle outputs
+android-app/app/build/
+android-app/.gradle/
+*.apk
+*.aab

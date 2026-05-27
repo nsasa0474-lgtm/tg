@@ -77,7 +77,7 @@ def fetch_remote_proxies(max_items: int = _MAX_LINES) -> list[dict]:
         try:
             req = urllib.request.Request(
                 url,
-                headers={"User-Agent": "TGTunnel/1.0"},
+                headers={"User-Agent": "TGonPC/1.0"},
             )
             with urllib.request.urlopen(req, timeout=_TIMEOUT) as resp:
                 body = resp.read(512_000).decode("utf-8", errors="replace")

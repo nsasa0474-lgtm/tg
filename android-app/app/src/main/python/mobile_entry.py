@@ -37,7 +37,7 @@ def start_bridge() -> None:
 
 
 def start_exit_probe() -> None:
-    """Проба: Java scan стартует из TunnelService; здесь только wait в фоне."""
+    """Проба: Java scan стартует из TgonpcService; здесь только wait в фоне."""
     if _bridge is None or not _bridge.ready:
         return
 

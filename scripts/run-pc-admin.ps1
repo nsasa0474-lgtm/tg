@@ -1,4 +1,4 @@
-# TG Tunnel — полный режим для ПК (системный SOCKS5 + NAT для Telegram)
+# TGonPC — полный режим для ПК (системный SOCKS5 + NAT для Telegram)
 $ErrorActionPreference = "Stop"
 Set-Location (Split-Path $PSScriptRoot -Parent)
 

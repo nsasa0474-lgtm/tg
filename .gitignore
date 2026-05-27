@@ -3,7 +3,7 @@ __pycache__/
 *.pyc
 build/
 dist/
-TGTunnel.spec
+tgonpc.spec
 .buildozer/
 bin/
 .pytest_cache/

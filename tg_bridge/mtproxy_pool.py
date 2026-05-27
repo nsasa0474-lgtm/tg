@@ -147,9 +147,9 @@ def apply_found_line(found: str) -> bool:
 
 def sync_progress_from_java() -> str:
     try:
-        from tg_bridge.android_java import tunnel_network_helper
+        from tg_bridge.android_java import tgonpc_network_helper
 
-        Helper = tunnel_network_helper()
+        Helper = tgonpc_network_helper()
         prog = str(Helper.getMtProxyProgress())
         found = str(Helper.getMtProxyFound())
         if found:
@@ -166,9 +166,9 @@ def sync_progress_from_java() -> str:
 
 def is_java_scan_running() -> bool:
     try:
-        from tg_bridge.android_java import tunnel_network_helper
+        from tg_bridge.android_java import tgonpc_network_helper
 
-        return bool(tunnel_network_helper().isMtProxyScanRunning())
+        return bool(tgonpc_network_helper().isMtProxyScanRunning())
     except Exception:
         return False
 

@@ -88,6 +88,6 @@ async def run_server(cfg: BridgeConfig, state: RuntimeState | None = None) -> No
     if state is not None:
         state.servers.append(server)
     addrs = ", ".join(str(s.getsockname()) for s in server.sockets or [])
-    log.info("SOCKS5 слушает %s", addrs)
+    log.status("SOCKS5 слушает %s", addrs)
     async with server:
         await server.serve_forever()

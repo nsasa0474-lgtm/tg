@@ -1,4 +1,4 @@
-package org.tgtunnel.app;
+package org.tgonpc.app;
 
 import android.Manifest;
 import android.content.ActivityNotFoundException;
@@ -93,9 +93,9 @@ public class MainActivity extends AppCompatActivity {
 
         toggle.setOnClickListener(v -> {
             if (running) {
-                stopTunnel();
+                stopBridge();
             } else {
-                startTunnel();
+                startBridge();
             }
         });
 
@@ -120,18 +120,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void startTunnelService() {
-        Intent svc = new Intent(this, TunnelService.class);
+    private void startTgonpcService() {
+        Intent svc = new Intent(this, TgonpcService.class);
         ContextCompat.startForegroundService(this, svc);
     }
 
-    private void stopTunnelService() {
-        Intent svc = new Intent(this, TunnelService.class);
-        svc.setAction(TunnelService.ACTION_STOP);
+    private void stopTgonpcService() {
+        Intent svc = new Intent(this, TgonpcService.class);
+        svc.setAction(TgonpcService.ACTION_STOP);
         startService(svc);
     }
 
-    private void startTunnel() {
+    private void startBridge() {
         if (!hasNotificationPermission()) {
             requestNotificationPermission();
             Toast.makeText(this, R.string.toast_allow_notif, Toast.LENGTH_LONG).show();
@@ -139,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
 
         toggle.setEnabled(false);
         status.setText(R.string.status_starting);
-        startTunnelService();
+        startTgonpcService();
 
         worker.execute(() -> {
             String err = "";
@@ -195,16 +195,16 @@ public class MainActivity extends AppCompatActivity {
                 if (success) {
                     running = true;
                     socksPort = socksFinal;
-                    toggle.setText(R.string.stop_tunnel);
+                    toggle.setText(R.string.stop_bridge);
                     telegram.setEnabled(true);
                     updateRunningStatus(socksPort, relayStr, relayVerified, progressNow, "");
                     startStatusPolling();
-                    Toast.makeText(this, R.string.toast_tunnel_ok, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.toast_bridge_ok, Toast.LENGTH_SHORT).show();
                     maybeAskBatteryOptimization();
                 } else {
-                    stopTunnelService();
+                    stopTgonpcService();
                     status.setText(getString(R.string.status_error, error.isEmpty() ? "?" : error));
-                    Toast.makeText(this, R.string.toast_tunnel_fail, Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, R.string.toast_bridge_fail, Toast.LENGTH_LONG).show();
                 }
             });
         });
@@ -235,12 +235,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void stopTunnel() {
+    private void stopBridge() {
         toggle.setEnabled(false);
         stopStatusPolling();
-        stopTunnelService();
+        stopTgonpcService();
         running = false;
-        toggle.setText(R.string.start_tunnel);
+        toggle.setText(R.string.start_bridge);
         toggle.setEnabled(true);
         telegram.setEnabled(false);
         status.setText(R.string.status_stopped);
@@ -274,7 +274,7 @@ public class MainActivity extends AppCompatActivity {
                 final String mode = exitMode;
                 runOnUiThread(() -> {
                     socksPort = socks;
-                    toggle.setText(R.string.stop_tunnel);
+                    toggle.setText(R.string.stop_bridge);
                     telegram.setEnabled(true);
                     updateRunningStatus(socks, relayIp, verified, prog, mode);
                 });

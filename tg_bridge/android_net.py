@@ -12,9 +12,9 @@ def try_bind_socket(sock: socket.socket) -> bool:
     if not is_android():
         return False
     try:
-        from tg_bridge.android_java import app_context, tunnel_network_helper
+        from tg_bridge.android_java import app_context, tgonpc_network_helper
 
-        Helper = tunnel_network_helper()
+        Helper = tgonpc_network_helper()
         ctx = app_context()
         fd = sock.fileno()
         Helper.refreshNetwork(ctx)

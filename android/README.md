@@ -1,67 +1,71 @@
-# TG Tunnel для Android (APK)
+# TGonPC для Android (APK)
 
-Отдельное приложение: кнопка **«Запустить туннель»** → внутри тот же мост (SOCKS5 `127.0.0.1:1080` → WebSocket MTProto), что и `TGTunnel.exe` на ПК.
+Нативное приложение (`android-app/`): кнопка **«Запустить обход»** → тот же мост, что и `tgonpc.exe` на ПК (SOCKS5 `127.0.0.1:1080` → WebSocket MTProto / MTProxy).
 
-## Что делает приложение
-
-1. Запускает локальный SOCKS5 на телефоне.
-2. Кнопка **«Настроить Telegram»** открывает `tg://socks?...` — в Telegram нажмите **«Подключить»**.
-3. Прокси остаётся в Telegram, пока включён туннель в приложении.
-
-**Важно:** пока туннель работает, не закрывайте приложение насовсем (Android может убить фоновые процессы). Держите TG Tunnel в фоне или включите для него «без ограничений батареи».
+В репозитории **нет** Android SDK и готового APK — собирайте локально.
 
 ---
 
-## Сборка APK (нужен Linux или WSL)
+## Требования
 
-На Windows APK собирают через **WSL2 (Ubuntu)** или Linux. На самом телефоне собрать нельзя.
+- **JDK 17** (или 11+)
+- **Android SDK** (через Android Studio или command-line tools)
+- Переменные: `ANDROID_HOME` или `ANDROID_SDK_ROOT`
+- Windows: PowerShell; для buildozer/Kivy — Linux/WSL
 
-### 1. WSL (Ubuntu)
+SDK в git не входит (см. корневой `README.md`).
+
+---
+
+## Сборка APK (Gradle, рекомендуется)
+
+Из корня репозитория:
+
+```powershell
+git clone https://github.com/nsasa0474-lgtm/tg.git
+cd tg
+
+# Скопировать Python-модуль в android-app
+.\scripts\sync-python-src.ps1
+
+cd android-app
+.\gradlew.bat assembleDebug
+```
+
+APK: `android-app\app\build\outputs\apk\debug\app-debug.apk`
+
+Или скрипт:
+
+```powershell
+.\scripts\build-apk-native.ps1
+```
+
+→ `dist\tgonpc-android-debug.apk`
+
+---
+
+## Сборка через Buildozer (Kivy, Linux/WSL)
 
 ```bash
-sudo apt update
-sudo apt install -y git zip unzip openjdk-17-jdk python3-pip python3-venv autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
 pip install buildozer cython
-```
-
-### 2. Клон / копия проекта в WSL
-
-```bash
-cd /mnt/d/TG   # или скопируйте папку в ~/TG
-```
-
-### 3. Сборка
-
-```bash
 buildozer android debug
 ```
 
-Готовый файл:
-
-```text
-bin/tgtunnel-1.0.0-arm64-v8a_armeabi-v7a-debug.apk
-```
-
-Скопируйте APK на телефон и установите (разрешите установку из неизвестных источников).
-
-Первая сборка скачивает Android SDK/NDK (~2–4 ГБ, 30–60 минут).
-
-### 4. Установка на телефон
-
-- Перенесите APK (USB, Telegram «Избранное», облако).
-- Откройте файл → Установить.
-- При первом запуске: **Запустить туннель** → **Настроить Telegram** → **Подключить**.
+APK: `bin/tgonpc-*-debug.apk`
 
 ---
 
-## Если relay перестанет работать
+## Установка и запуск
 
-Как на ПК: смените IP relay в коде (`DEFAULT_RELAY_IP` в `tg_bridge/config.py`) и пересоберите APK.
+1. Установить APK на телефон.
+2. **Запустить обход** — дождаться ✓ в статусе.
+3. **Настроить Telegram** → «Подключить» (SOCKS5 `127.0.0.1:1080`).
+4. Разрешить уведомления и отключить оптимизацию батареи для TGonPC (иначе Android может остановить обход).
+
+Пока обход работает, не убивайте приложение — держите уведомление TGonPC активным.
 
 ---
 
-## Ограничения v1
+## Пакет приложения
 
-- Нет отдельного «системного VPN» — только SOCKS5 в настройках Telegram (как на ПК).
-- Нет Google Play — только свой APK (debug/release).
-- Сборка только на Linux/WSL, не в Android Studio на Windows без WSL.
+`applicationId`: `org.tgonpc.app`

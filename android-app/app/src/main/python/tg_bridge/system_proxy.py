@@ -18,7 +18,7 @@ INTERNET_OPTION_REFRESH = 37
 
 _wininet = ctypes.windll.wininet
 
-_BACKUP_FILE = Path(os.environ.get("TEMP", ".")) / "tg_tunnel_proxy_backup.json"
+_BACKUP_FILE = Path(os.environ.get("TEMP", ".")) / "tgonpc_proxy_backup.json"
 
 
 def _notify_proxy_change() -> None:
@@ -110,7 +110,7 @@ def force_disable_ours(
     http_port: int = 1081,
     pac_port: int = 1082,
 ) -> None:
-    """Убрать наш прокси; по возможности восстановить то, что было до TG Tunnel."""
+    """Убрать наш прокси; по возможности восстановить то, что было до TGonPC."""
     if not _is_ours(host, socks_port, http_port, pac_port):
         return
     if _restore_backup():
@@ -122,7 +122,7 @@ def force_disable_ours(
             winreg.DeleteValue(key, "AutoConfigURL")
         except OSError:
             pass
-        log.info("Сброшен системный прокси Windows (остаток TG Tunnel)")
+        log.info("Сброшен системный прокси Windows (остаток TGonPC)")
     finally:
         winreg.CloseKey(key)
     _notify_proxy_change()

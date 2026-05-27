@@ -1,7 +1,7 @@
-package org.tgtunnel.app;
+package org.tgonpc.app;
 
 import com.chaquo.python.android.PyApplication;
 
 /** Инициализирует Python (AndroidPlatform) до любого вызова Python.getInstance(). */
-public class TgTunnelApp extends PyApplication {
+public class TgonpcApp extends PyApplication {
 }

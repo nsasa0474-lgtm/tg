@@ -8,7 +8,7 @@ from typing import Callable
 
 import pyaes
 
-from tg_bridge.mtproxy_client import parse_mtproxy_secret
+from tg_bridge.mtproxy_secret import parse_mtproxy_secret
 from tg_bridge.mtproto import _AesCtr
 
 PROTO_PADDED = struct.pack("<I", 0xDDDDDDDD)

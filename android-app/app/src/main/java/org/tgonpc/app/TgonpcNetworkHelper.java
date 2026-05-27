@@ -1,4 +1,4 @@
-package org.tgtunnel.app;
+package org.tgonpc.app;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -26,15 +26,15 @@ import java.util.Collections;
  * LTE: исходящие сокеты Python должны идти через мобильную сеть, а не «мёртвый» Wi‑Fi.
  * bindProcessToNetwork + bindSocket на каждый connect.
  */
-public final class TunnelNetworkHelper extends ConnectivityManager.NetworkCallback {
-    private static final String TAG = "TGTunnel";
+public final class TgonpcNetworkHelper extends ConnectivityManager.NetworkCallback {
+    private static final String TAG = "TGonPC";
     private static volatile ConnectivityManager sCm;
     private static volatile Network sNetwork;
     private static ConnectivityManager.NetworkCallback sCallback;
     private static ConnectivityManager.NetworkCallback sCellCallback;
     private static volatile Network sCellNetwork;
 
-    private TunnelNetworkHelper() {
+    private TgonpcNetworkHelper() {
     }
 
     public static void start(Context context) {
@@ -45,7 +45,7 @@ public final class TunnelNetworkHelper extends ConnectivityManager.NetworkCallba
                 return;
             }
             stop(context);
-            sCallback = new TunnelNetworkHelper();
+            sCallback = new TgonpcNetworkHelper();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 sCm.registerDefaultNetworkCallback(sCallback);
             } else {
@@ -687,7 +687,7 @@ public final class TunnelNetworkHelper extends ConnectivityManager.NetworkCallba
                     mtScanRunning = false;
                 }
             },
-            "TGTunnel-MtScan"
+            "TGonPC-MtScan"
         );
         mtScanThread.setDaemon(true);
         mtScanThread.start();

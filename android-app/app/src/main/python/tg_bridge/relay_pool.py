@@ -13,6 +13,7 @@ log = logging.getLogger("tg_bridge")
 _PROBE_DOMAIN = "kws2.web.telegram.org"
 
 _RELAY_PRIORITY = (
+    DEFAULT_RELAY_IP,
     "149.154.167.51",
     "95.161.76.100",
     "149.154.175.50",
@@ -25,7 +26,6 @@ _RELAY_PRIORITY = (
     "91.108.56.100",
     "91.105.192.100",
     "149.154.167.92",
-    DEFAULT_RELAY_IP,
 )
 
 _lock = threading.Lock()
@@ -34,16 +34,19 @@ _working_domain: str | None = None
 _verified = False
 _probe_progress = ""
 _probe_running = False
+_fail_strikes: dict[str, int] = {}
+_STRIKE_LIMIT = 4
 
 
 def reset_probe_state() -> None:
-    global _probe_running, _probe_progress, _working, _verified, _working_domain
+    global _probe_running, _probe_progress, _working, _verified, _working_domain, _fail_strikes
     with _lock:
         _probe_running = False
         _probe_progress = "инициализация"
         _working = None
         _working_domain = None
         _verified = False
+        _fail_strikes = {}
     try:
         from tg_bridge.mtproxy_pool import note_mtproxy_failure
 
@@ -125,33 +128,61 @@ def _set_progress(msg: str) -> None:
     global _probe_progress
     with _lock:
         _probe_progress = msg
-    log.info("probe: %s", msg)
+    log.debug("probe: %s", msg)
 
 
 def note_relay_success(host: str, ws_domain: str | None = None, *, direct: bool = False) -> None:
-    global _working, _working_domain, _verified
+    global _working, _working_domain, _verified, _fail_strikes
     with _lock:
         _working = host
         _working_domain = ws_domain or (host if direct else _PROBE_DOMAIN)
         _verified = True
         _probe_progress = "ok"
-    log.info("endpoint OK: %s", host)
+        _fail_strikes.pop(host, None)
+    log.debug("endpoint OK: %s", host)
+
+
+def note_relay_failure(key: str) -> None:
+    """Снять relay только после нескольких сбоев подряд (не один таймаут)."""
+    global _working, _verified, _fail_strikes
+    reprobe = False
+    with _lock:
+        if _working != key:
+            return
+        n = _fail_strikes.get(key, 0) + 1
+        _fail_strikes[key] = n
+        if n < _STRIKE_LIMIT:
+            log.warning("relay %s: сбой %d/%d", key, n, _STRIKE_LIMIT)
+            return
+        log.warning("relay %s снят после %d сбоев", key, n)
+        _working = None
+        _verified = False
+        _fail_strikes.pop(key, None)
+        reprobe = True
+    if reprobe:
+        run_exit_probe()
 
 
 def _probe_mtproxy_path(timeout_ms: int) -> str | None:
     from tg_bridge.mtproxy_pool import (
         get_working_mtproxy,
         is_java_scan_running,
+        scan_mtproxy_list_sync,
         wait_java_mtproxy_scan,
     )
 
     _set_progress("MTProxy…")
-    mp = wait_java_mtproxy_scan(120.0)
-    if mp:
-        return mp["host"]
-    if is_java_scan_running():
-        _set_progress("MTProxy: идёт поиск…")
-        return None
+    if is_android():
+        mp = wait_java_mtproxy_scan(120.0)
+        if mp:
+            return mp["host"]
+        if is_java_scan_running():
+            _set_progress("MTProxy: идёт поиск…")
+            return None
+    else:
+        mp = scan_mtproxy_list_sync(timeout_ms=timeout_ms, max_items=40)
+        if mp:
+            return mp["host"]
     _set_progress("не найден (MTProxy)")
     return None
 
@@ -196,10 +227,10 @@ def find_working_exit_sync(timeout_ms: int = 2500) -> str | None:
         if is_android():
             cellular = True
             try:
-                from tg_bridge.android_java import app_context, tunnel_network_helper
+                from tg_bridge.android_java import app_context, tgonpc_network_helper
 
                 cellular = bool(
-                    tunnel_network_helper().isCellularPreferred(app_context())
+                    tgonpc_network_helper().isCellularPreferred(app_context())
                 )
             except Exception:
                 pass
@@ -217,12 +248,12 @@ def find_working_exit_sync(timeout_ms: int = 2500) -> str | None:
         loop = asyncio.new_event_loop()
         try:
             asyncio.set_event_loop(loop)
-            hit = loop.run_until_complete(_python_ws_probe(timeout_ms))
+            hit = loop.run_until_complete(_python_ws_probe(max(timeout_ms, 3500)))
             if hit:
                 return hit
         finally:
             loop.close()
-        return _probe_mtproxy_path(timeout_ms)
+        return _probe_mtproxy_path(max(timeout_ms, 3000))
     except Exception as exc:
         log.exception("exit probe")
         _set_progress("ошибка: %s" % exc)
@@ -232,14 +263,6 @@ def find_working_exit_sync(timeout_ms: int = 2500) -> str | None:
             _probe_running = False
 
 
-def note_relay_failure(key: str) -> None:
-    global _working, _verified
-    with _lock:
-        if _working == key:
-            _working = None
-            _verified = False
-
-
 def apply_relay_to_config(cfg, ip: str) -> None:
     for dc in list(cfg.dc_relay_ips.keys()):
         cfg.dc_relay_ips[dc] = ip
@@ -247,6 +270,12 @@ def apply_relay_to_config(cfg, ip: str) -> None:
 
 def run_exit_probe(on_found=None) -> None:
     """Запуск поиска выхода — прогресс обновляется сразу в этом потоке."""
+    global _probe_running
+    if is_relay_verified():
+        return
+    with _lock:
+        if _probe_running:
+            return
     _set_progress("SOCKS ✓ → поиск…")
 
     def _bg() -> None:
@@ -271,3 +300,29 @@ def start_background_probe(on_found=None) -> None:
 
 find_working_relay_sync = find_working_exit_sync
 find_working_relay_android = find_working_exit_sync
+
+
+async def health_check_relay() -> None:
+    """Периодическая проверка — не даём «протухнуть» без переподбора."""
+    ep = get_working_endpoint()
+    if not ep:
+        kick_exit_probe()
+        return
+    host, domain = ep
+    writer = None
+    try:
+        _r, writer = await asyncio.wait_for(
+            ws.ws_connect(host, domain, 5.0),
+            timeout=8.0,
+        )
+        note_relay_success(host, domain, direct=any(c.isalpha() for c in host))
+    except Exception as exc:
+        log.debug("health check %s: %s", host, exc)
+        note_relay_failure(host)
+    finally:
+        if writer is not None:
+            try:
+                writer.close()
+                await writer.wait_closed()
+            except Exception:
+                pass

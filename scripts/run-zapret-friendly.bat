@@ -1,10 +1,10 @@
 @echo off
 chcp 65001 >nul
 cd /d "%~dp0\.."
-echo TG Tunnel + Zapret: только Telegram, без системного прокси
+echo TGonPC + Zapret: только Telegram, без системного прокси
 echo.
-if exist "dist\TGTunnel.exe" (
-    "dist\TGTunnel.exe" --zapret
+if exist "dist\tgonpc.exe" (
+    "dist\tgonpc.exe" --zapret
 ) else if exist "venv\Scripts\python.exe" (
     "venv\Scripts\python.exe" run.py --zapret
 ) else (

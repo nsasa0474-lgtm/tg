@@ -10,11 +10,11 @@ def pyExe = System.getenv("TG_BUILD_PYTHON") ?: {
 }()
 
 android {
-    namespace "org.tgtunnel.app"
+    namespace "org.tgonpc.app"
     compileSdk 34
 
     defaultConfig {
-        applicationId "org.tgtunnel.app"
+        applicationId "org.tgonpc.app"
         minSdk 24
         targetSdk 34
         versionCode 29

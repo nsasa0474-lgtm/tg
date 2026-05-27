@@ -2,63 +2,62 @@
 
 <resources>
 
-    <string name="app_name">TG Tunnel</string>
+    <string name="app_name">TGonPC</string>
 
-    <string name="start_tunnel">Запустить туннель</string>
+    <string name="start_bridge">Запустить обход</string>
 
-    <string name="stop_tunnel">Остановить</string>
+    <string name="stop_bridge">Остановить</string>
 
     <string name="setup_telegram">Настроить Telegram</string>
 
     <string name="status_loading">Загрузка…</string>
 
-    <string name="status_idle">Нажмите «Запустить туннель».</string>
+    <string name="status_idle">Нажмите «Запустить обход».</string>
 
     <string name="status_starting">Поиск relay Telegram…</string>
 
-    <string name="status_running">Туннель работает.</string>
+    <string name="status_running">Обход работает.</string>
 
-    <string name="status_running_port">Туннель работает.\nSOCKS5: 127.0.0.1:%1$d\nПоиск выхода…</string>
+    <string name="status_running_port">Обход работает.\nSOCKS5: 127.0.0.1:%1$d\nПоиск выхода…</string>
 
     <string name="status_not_found">SOCKS5: 127.0.0.1:%1$d\n%2$s\n\nИщем MTProxy в фоне… Смотрите уведомление.\nЕсли ✓ не появится — оператор блокирует всё.</string>
 
     <string name="status_running_search">SOCKS5: 127.0.0.1:%1$d\n%2$s</string>
 
-    <string name="status_running_relay">Туннель работает.\nSOCKS5: 127.0.0.1:%1$d\nВыход: %2$s ✓</string>
+    <string name="status_running_relay">Обход работает.\nSOCKS5: 127.0.0.1:%1$d\nВыход: %2$s ✓</string>
 
-    <string name="status_running_mtproxy">Туннель работает.\nSOCKS5: 127.0.0.1:%1$d\nLTE: MTProxy %2$s ✓</string>
+    <string name="status_running_mtproxy">Обход работает.\nSOCKS5: 127.0.0.1:%1$d\nLTE: MTProxy %2$s ✓</string>
 
     <string name="status_stopped">Остановлено.</string>
 
     <string name="status_error">Ошибка: %1$s</string>
 
-    <string name="status_proxy_unreachable">SOCKS5 не отвечает.\nЗапустите туннель снова — уведомление должно висеть.</string>
+    <string name="status_proxy_unreachable">SOCKS5 не отвечает.\nЗапустите обход снова — уведомление должно висеть.</string>
 
-    <string name="hint_socks">1) Запустить — дождитесь ✓.\n2) «Настроить Telegram» → SOCKS5 127.0.0.1.\nТуннель сам найдёт выход (relay или MTProxy).</string>
+    <string name="hint_socks">1) Запустить — дождитесь ✓.\n2) «Настроить Telegram» → SOCKS5 127.0.0.1.\nTGonPC сам найдёт выход (relay или MTProxy).</string>
 
-    <string name="notif_channel">Туннель</string>
+    <string name="notif_channel">TGonPC</string>
 
-    <string name="notif_running">Туннель работает (SOCKS5 127.0.0.1)</string>
+    <string name="notif_running">Обход работает (SOCKS5 127.0.0.1)</string>
 
-    <string name="toast_tunnel_ok">Туннель запущен</string>
+    <string name="toast_bridge_ok">Обход запущен</string>
 
-    <string name="toast_tunnel_fail">Не удалось запустить туннель</string>
+    <string name="toast_bridge_fail">Не удалось запустить обход</string>
 
-    <string name="toast_start_first">Сначала запустите туннель</string>
+    <string name="toast_start_first">Сначала запустите обход</string>
 
-    <string name="toast_allow_notif">Разрешите уведомления — без них Android может убить туннель</string>
+    <string name="toast_allow_notif">Разрешите уведомления — без них Android может остановить обход</string>
 
-    <string name="toast_proxy_dead">SOCKS5 не отвечает. Запустите туннель снова и не закрывайте уведомление.</string>
+    <string name="toast_proxy_dead">SOCKS5 не отвечает. Запустите обход снова и не закрывайте уведомление.</string>
 
     <string name="battery_title">Батарея</string>
 
-    <string name="battery_body">Для LTE отключите оптимизацию батареи для TG Tunnel.</string>
+    <string name="battery_body">Для LTE отключите оптимизацию батареи для TGonPC.</string>
 
     <string name="battery_open">Открыть настройки</string>
 
     <string name="manual_proxy_title">Настройка вручную</string>
 
-    <string name="manual_proxy_body">Telegram → Настройки → Данные и память → Тип прокси → SOCKS5\n\nСервер: 127.0.0.1 (не localhost!)\nПорт: %1$d\nЛогин/пароль: пусто\n\nВключите прокси. Уведомление TG Tunnel должно висеть.</string>
+    <string name="manual_proxy_body">Telegram → Настройки → Данные и память → Тип прокси → SOCKS5\n\nСервер: 127.0.0.1 (не localhost!)\nПорт: %1$d\nЛогин/пароль: пусто\n\nВключите прокси. Уведомление TGonPC должно висеть.</string>
 
 </resources>
-

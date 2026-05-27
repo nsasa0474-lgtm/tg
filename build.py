@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Сборка TG Tunnel в один файл TGTunnel.exe (Windows).
+Сборка TGonPC в один файл tgonpc.exe (Windows).
 
 Запуск:
   python build.py
 
 Результат:
-  dist/TGTunnel.exe  — скопируйте на любой ПК и запустите (Python не нужен).
+  dist/tgonpc.exe  — скопируйте на любой ПК и запустите (Python не нужен).
 """
 from __future__ import annotations
 
@@ -19,9 +19,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 DIST = ROOT / "dist"
 BUILD = ROOT / "build"
-SPEC = ROOT / "TGTunnel.spec"
+SPEC = ROOT / "tgonpc.spec"
 VENV_PY = ROOT / "venv" / "Scripts" / "python.exe"
-OUT_NAME = "TGTunnel"
+OUT_NAME = "tgonpc"
 
 
 def _python() -> str:
@@ -207,7 +207,7 @@ def main() -> int:
     print(f"  Готово: {exe}")
     print(f"  Размер: {mb:.1f} MB")
     print()
-    print("  На другом ПК: скопируйте TGTunnel.exe и запустите.")
+    print("  На другом ПК: скопируйте tgonpc.exe и запустите.")
     print("  В Telegram нажмите «Подключить», если спросит прокси.")
     print("=" * 60)
     return 0

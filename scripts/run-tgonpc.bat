@@ -2,8 +2,8 @@
 chcp 65001 >nul
 cd /d "%~dp0\.."
 
-if exist "dist\TGTunnel.exe" (
-    start "" "dist\TGTunnel.exe"
+if exist "dist\tgonpc.exe" (
+    start "" "dist\tgonpc.exe"
     exit /b 0
 )
 

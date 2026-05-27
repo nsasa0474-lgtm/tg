@@ -13,5 +13,5 @@ dependencyResolutionManagement {
         maven { url "https://chaquo.com/chaquopy" }
     }
 }
-rootProject.name = "TGTunnel"
+rootProject.name = "TGonPC"
 include ':app'

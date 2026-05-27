@@ -14,7 +14,7 @@ $CmdlineDir = Join-Path $SdkRoot "cmdline-tools\latest"
 
 function Ensure-Dir($p) { New-Item -ItemType Directory -Force -Path $p | Out-Null }
 
-Write-Host "== TG Tunnel: build APK ==" -ForegroundColor Cyan
+Write-Host "== TGonPC: build APK ==" -ForegroundColor Cyan
 
 & (Join-Path $PSScriptRoot "sync-python-src.ps1")
 
@@ -95,7 +95,7 @@ $apk = Get-ChildItem -Path (Join-Path $Root "android-app\app\build\outputs\apk\d
 if (-not $apk) { throw "APK not found after build" }
 
 Ensure-Dir (Join-Path $Root "dist")
-$out = Join-Path $Root "dist\TGTunnel-android-debug.apk"
+$out = Join-Path $Root "dist\tgonpc-android-debug.apk"
 Copy-Item $apk.FullName $out -Force
 Write-Host ""
 Write-Host "DONE: $out" -ForegroundColor Green

@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "TG Tunnel (run.py)",
+      "name": "TGonPC (run.py)",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/run.py",

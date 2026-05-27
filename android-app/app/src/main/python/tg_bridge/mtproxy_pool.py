@@ -147,9 +147,9 @@ def apply_found_line(found: str) -> bool:
 
 def sync_progress_from_java() -> str:
     try:
-        from tg_bridge.android_java import tunnel_network_helper
+        from tg_bridge.android_java import tgonpc_network_helper
 
-        Helper = tunnel_network_helper()
+        Helper = tgonpc_network_helper()
         prog = str(Helper.getMtProxyProgress())
         found = str(Helper.getMtProxyFound())
         if found:
@@ -166,9 +166,9 @@ def sync_progress_from_java() -> str:
 
 def is_java_scan_running() -> bool:
     try:
-        from tg_bridge.android_java import tunnel_network_helper
+        from tg_bridge.android_java import tgonpc_network_helper
 
-        return bool(tunnel_network_helper().isMtProxyScanRunning())
+        return bool(tgonpc_network_helper().isMtProxyScanRunning())
     except Exception:
         return False
 
@@ -207,7 +207,47 @@ def get_mtproxy_tg_uri() -> str:
 
 
 def find_working_mtproxy_sync(timeout_ms: int = 2000) -> dict | None:
-    return find_working_mtproxy(timeout_ms)
+    if is_mtproxy_active():
+        return get_working_mtproxy()
+    if is_android():
+        wait_java_mtproxy_scan(5.0)
+        return get_working_mtproxy()
+    return scan_mtproxy_list_sync(timeout_ms=timeout_ms, max_items=35)
+
+
+def scan_mtproxy_list_sync(
+    timeout_ms: int = 2500,
+    max_items: int = 35,
+    *,
+    strict: bool = False,
+) -> dict | None:
+    """PC: перебор MTProxy в Python (без Java)."""
+    if is_mtproxy_active():
+        return get_working_mtproxy()
+    from tg_bridge.mtproxy_client import connect_mtproxy_sync
+
+    tmo = max(1.5, timeout_ms / 1000.0)
+    proxies = load_proxy_list()[:max_items]
+    total = len(proxies)
+    for i, p in enumerate(proxies, start=1):
+        from tg_bridge.relay_pool import _set_progress
+
+        _set_progress("MTProxy %d/%d · %s" % (i, total, p["host"]))
+        sock = connect_mtproxy_sync(
+            str(p["host"]),
+            int(p["port"]),
+            str(p["secret"]),
+            tmo,
+            strict=strict,
+        )
+        if sock is not None:
+            try:
+                sock.close()
+            except OSError:
+                pass
+            note_mtproxy_success(p)
+            return p
+    return None
 
 
 def start_mtproxy_retry_loop() -> None:

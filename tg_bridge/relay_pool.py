@@ -227,10 +227,10 @@ def find_working_exit_sync(timeout_ms: int = 2500) -> str | None:
         if is_android():
             cellular = True
             try:
-                from tg_bridge.android_java import app_context, tunnel_network_helper
+                from tg_bridge.android_java import app_context, tgonpc_network_helper
 
                 cellular = bool(
-                    tunnel_network_helper().isCellularPreferred(app_context())
+                    tgonpc_network_helper().isCellularPreferred(app_context())
                 )
             except Exception:
                 pass

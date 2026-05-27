@@ -36,7 +36,7 @@ def bind_state(state: RuntimeState) -> None:
 
 
 def recover_stale_proxy(cfg: BridgeConfig) -> None:
-    """Только если прошлый запуск TG Tunnel оставил СВОЙ прокси — не трогать Запрет."""
+    """Только если прошлый запуск TGonPC оставил СВОЙ прокси — не трогать Запрет."""
     if is_android():
         return
     try:
@@ -113,7 +113,7 @@ def full_shutdown(cfg: BridgeConfig | None = None, *, quiet: bool = False) -> No
 
     _STATE = None
     if not quiet:
-        log.info("TG Tunnel остановлен")
+        log.status("TGonPC остановлен")
 
 
 def register_exit_hooks(cfg: BridgeConfig) -> None:

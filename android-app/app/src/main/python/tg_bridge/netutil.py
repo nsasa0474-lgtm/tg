@@ -108,10 +108,37 @@ async def wait_socks5_ready(host: str, port: int, timeout: float = 15.0) -> bool
             resp = await asyncio.wait_for(reader.readexactly(2), timeout=2.0)
             await safe_close(writer)
             if resp == b"\x05\x00":
-                log.info("SOCKS5 готов (%s:%s)", host, port)
+                log.status("SOCKS5 готов (%s:%s)", host, port)
                 return True
         except Exception:
             pass
         await asyncio.sleep(0.15)
     log.warning("SOCKS5 не ответил за %ss", timeout)
     return False
+
+
+async def wait_exit_ready(timeout: float = 40.0) -> bool:
+    """Дождаться relay/MTProxy перед tg:// — иначе Telegram отключает SOCKS."""
+    from tg_bridge.relay_pool import get_probe_progress, is_relay_verified
+
+    loop = asyncio.get_running_loop()
+    deadline = loop.time() + timeout
+    last_log = 0.0
+    while loop.time() < deadline:
+        if is_relay_verified():
+            log.status("Выход готов")
+            return True
+        prog = get_probe_progress()
+        now = loop.time()
+        if prog and now - last_log > 3.0:
+            log.status("Поиск выхода: %s", prog)
+            last_log = now
+        await asyncio.sleep(0.2)
+    ok = is_relay_verified()
+    if not ok:
+        log.warning(
+            "Выход не найден за %ss — Telegram может отключить прокси. "
+            "Подождите «ok» в логе или перезапустите.",
+            int(timeout),
+        )
+    return ok

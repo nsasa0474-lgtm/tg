@@ -19,7 +19,7 @@ BoxLayout:
     spacing: '12dp'
 
     Label:
-        text: 'TG Tunnel'
+        text: 'TGonPC'
         font_size: '26sp'
         bold: True
         size_hint_y: None
@@ -35,10 +35,10 @@ BoxLayout:
         height: self.texture_size[1] + '8dp'
 
     Button:
-        text: 'Остановить' if root.running else 'Запустить туннель'
+        text: 'Остановить' if root.running else 'Запустить обход'
         size_hint_y: None
         height: '52dp'
-        on_release: root.toggle_tunnel()
+        on_release: root.toggle_bridge()
 
     Button:
         text: 'Настроить Telegram (Подключить)'
@@ -54,8 +54,8 @@ BoxLayout:
 """
 
 
-class TGTunnelApp(App):
-    status_text = StringProperty("Нажмите «Запустить туннель».")
+class TgonpcApp(App):
+    status_text = StringProperty("Нажмите «Запустить обход».")
     running = BooleanProperty(False)
 
     def __init__(self, **kwargs):
@@ -65,7 +65,7 @@ class TGTunnelApp(App):
     def build(self):
         return Builder.load_string(KV)
 
-    def toggle_tunnel(self):
+    def toggle_bridge(self):
         if self.running:
             self._bridge.stop()
             self.running = False
@@ -80,7 +80,7 @@ class TGTunnelApp(App):
     def _set_running(self):
         self.running = True
         self.status_text = (
-            "Туннель работает.\n"
+            "Обход работает.\n"
             "Нажмите «Настроить Telegram» и подтвердите «Подключить»."
         )
 
@@ -94,4 +94,4 @@ class TGTunnelApp(App):
 
 def run_app():
     logging.basicConfig(level=logging.INFO, format="%(message)s")
-    TGTunnelApp().run()
+    TgonpcApp().run()

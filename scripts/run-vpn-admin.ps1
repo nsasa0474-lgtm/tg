@@ -1,4 +1,4 @@
-# TG Tunnel — полный режим (системный прокси + NAT), нужен админ
+# TGonPC — полный режим (системный прокси + NAT), нужен админ
 $ErrorActionPreference = "Stop"
 Set-Location (Split-Path $PSScriptRoot -Parent)
 

@@ -1,8 +1,8 @@
 [app]
 
-title = TG Tunnel
-package.name = tgtunnel
-package.domain = org.tgtunnel
+title = TGonPC
+package.name = tgonpc
+package.domain = org.tgonpc
 source.dir = .
 source.include_exts = py,png,txt
 source.include_patterns = tg_bridge/*,mobile_app/*

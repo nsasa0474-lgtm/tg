@@ -19,6 +19,7 @@ async def passthrough(
     host: str,
     port: int,
     label: str,
+    cfg: BridgeConfig | None = None,
 ) -> None:
     try:
         remote_r, remote_w = await asyncio.wait_for(
@@ -26,6 +27,12 @@ async def passthrough(
             timeout=10.0,
         )
     except OSError as exc:
+        if cfg is not None and port in (80, 443, 5222, 8888):
+            from tg_bridge.handler import handle_tcp_relay
+
+            log.debug("[%s] passthrough fail %s:%s → relay", label, host, port)
+            await handle_tcp_relay(reader, writer, host, port, cfg, label)
+            return
         log.warning("[%s] passthrough %s:%s — %s", label, host, port, exc)
         return
     await asyncio.gather(pipe(reader, remote_w), pipe(remote_r, writer))
@@ -45,8 +52,8 @@ async def dispatch(
 ) -> None:
     if is_telegram_target(host):
         if port != 80:
-            log.info("[%s] -> %s:%s", label, host, port)
+            log.debug("[%s] -> %s:%s", label, host, port)
         await route_telegram_connection(reader, writer, host, port, cfg, label)
     else:
         log.debug("[%s] passthrough %s:%s", label, host, port)
-        await passthrough(reader, writer, host, port, label)
+        await passthrough(reader, writer, host, port, label, cfg)

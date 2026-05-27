@@ -1,6 +1,6 @@
 """
 Точка входа для Android (buildozer / Kivy).
-На ПК для туннеля используйте: python run.py
+На ПК используйте: python run.py
 """
 from mobile_app.app import run_app
 

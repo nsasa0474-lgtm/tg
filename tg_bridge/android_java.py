@@ -8,7 +8,7 @@ def app_context():
     return Python.getPlatform().getApplication()
 
 
-def tunnel_network_helper():
-    from org.tgtunnel.app import TunnelNetworkHelper
+def tgonpc_network_helper():
+    from org.tgonpc.app import TgonpcNetworkHelper
 
-    return TunnelNetworkHelper
+    return TgonpcNetworkHelper

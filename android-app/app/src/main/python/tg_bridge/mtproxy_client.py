@@ -1,48 +1,22 @@
 from __future__ import annotations
 
 import asyncio
-import base64
 import logging
 import re
 import socket
 import threading
+from typing import TYPE_CHECKING
 
+from tg_bridge.mtproxy_secret import parse_mtproxy_secret
 from tg_bridge.platform import is_android
-from tg_bridge.mtproxy_tunnel import MtProxySocket, connect_mtproxy_tunnel
+
+if TYPE_CHECKING:
+    from tg_bridge.mtproxy_tunnel import MtProxySocket
 
 log = logging.getLogger("tg_bridge")
 
 _HEX = re.compile(r"^[0-9a-fA-F]+$")
 _IP = re.compile(r"^\d{1,3}(\.\d{1,3}){3}$")
-
-
-def _b64_payload(payload: str) -> bytes:
-    pad = "=" * ((4 - len(payload) % 4) % 4)
-    try:
-        return base64.urlsafe_b64decode(payload + pad)
-    except Exception:
-        return base64.b64decode(payload + pad)
-
-
-def _decode_payload(payload: str) -> bytes:
-    if _HEX.match(payload) and len(payload) % 2 == 0:
-        try:
-            return bytes.fromhex(payload)
-        except ValueError:
-            pass
-    return _b64_payload(payload)
-
-
-def parse_mtproxy_secret(secret: str) -> bytes:
-    s = secret.strip().replace("-", "")
-    if s.startswith(("ee", "dd")):
-        return _decode_payload(s[2:])
-    if len(s) == 32 and _HEX.match(s):
-        return bytes.fromhex(s)
-    if _HEX.match(s) and len(s) % 2 == 0:
-        return bytes.fromhex(s)
-    return _b64_payload(s)
-
 
 def _resolve_ipv4(host: str, timeout: float) -> str | None:
     if _IP.match(host):
@@ -72,6 +46,7 @@ def connect_mtproxy_sync(
     timeout: float = 2.0,
     *,
     bind_network: bool = False,
+    strict: bool = True,
 ) -> socket.socket | None:
     """Синхронное подключение — не зависает на asyncio (Android)."""
     try:
@@ -117,7 +92,8 @@ def connect_mtproxy_sync(
             return None
         s = secret.strip().lower()
         if s.startswith(("ee", "dd")):
-            if buf[0] != 0x16 or len(buf) < 80:
+            min_len = 80 if strict else 32
+            if buf[0] != 0x16 or len(buf) < min_len:
                 sock.close()
                 return None
         sock.settimeout(timeout)
@@ -156,6 +132,8 @@ async def open_mtproxy(
     bind_network: bool = True,
     dc: int = 2,
 ) -> _AsyncMtProxy:
+    from tg_bridge.mtproxy_tunnel import connect_mtproxy_tunnel
+
     loop = asyncio.get_running_loop()
 
     def _connect() -> MtProxySocket:

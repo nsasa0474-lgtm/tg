@@ -1,4 +1,4 @@
-"""TG Tunnel — точка входа (IDE и сборка .exe)."""
+"""TGonPC — точка входа (IDE и сборка .exe)."""
 from tg_bridge.main import main
 
 if __name__ == "__main__":

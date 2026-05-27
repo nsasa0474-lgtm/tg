@@ -1,7 +1,7 @@
 @echo off
 chcp 65001 >nul
 cd /d "%~dp0\.."
-echo TG Tunnel - сборка одного EXE
+echo TGonPC - сборка одного EXE
 echo.
 
 if exist "venv\Scripts\python.exe" (
@@ -19,5 +19,5 @@ if errorlevel 1 (
 )
 
 echo.
-echo Файл: dist\TGTunnel.exe
+echo Файл: dist\tgonpc.exe
 pause

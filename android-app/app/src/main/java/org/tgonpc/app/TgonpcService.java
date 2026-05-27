@@ -1,4 +1,4 @@
-package org.tgtunnel.app;
+package org.tgonpc.app;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -15,9 +15,9 @@ import com.chaquo.python.android.AndroidPlatform;
 import com.chaquo.python.Python;
 
 /** Foreground-сервис: держит процесс и запускает Python SOCKS5. */
-public class TunnelService extends Service {
-    public static final String ACTION_STOP = "org.tgtunnel.app.STOP";
-    private static final String CHANNEL_ID = "tgtunnel_run";
+public class TgonpcService extends Service {
+    public static final String ACTION_STOP = "org.tgonpc.app.STOP";
+    private static final String CHANNEL_ID = "TGonPC_run";
     private static final int NOTIF_ID = 1;
     private volatile boolean bridgeStartRequested = false;
     private volatile boolean exitProbeRequested = false;
@@ -39,7 +39,7 @@ public class TunnelService extends Service {
             bridgeStartRequested = false;
             exitProbeRequested = false;
             stopBridgeAsync();
-            TunnelNetworkHelper.stop(getApplicationContext());
+            TgonpcNetworkHelper.stop(getApplicationContext());
             releaseWakeLock();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 stopForeground(STOP_FOREGROUND_REMOVE);
@@ -59,21 +59,21 @@ public class TunnelService extends Service {
                 startForeground(NOTIF_ID, n);
             }
         } catch (Exception e) {
-            android.util.Log.e("TGTunnel", "startForeground", e);
+            android.util.Log.e("TGonPC", "startForeground", e);
             try {
                 startForeground(NOTIF_ID, n);
             } catch (Exception e2) {
-                android.util.Log.e("TGTunnel", "startForeground fallback", e2);
+                android.util.Log.e("TGonPC", "startForeground fallback", e2);
                 stopSelf();
                 return START_NOT_STICKY;
             }
         }
-        TunnelNetworkHelper.start(getApplicationContext());
+        TgonpcNetworkHelper.start(getApplicationContext());
 
         if (!bridgeStartRequested) {
             bridgeStartRequested = true;
             new Thread(this::startBridgeBlocking).start();
-            new Thread(this::watchBridge, "TGTunnel-watch").start();
+            new Thread(this::watchBridge, "TGonPC-watch").start();
         }
         return START_STICKY;
     }
@@ -95,10 +95,10 @@ public class TunnelService extends Service {
                         exitProbeRequested = true;
                         String batch = mod.callAttr("get_mtproxy_batch").toString();
                         if (batch != null && !batch.isEmpty()) {
-                            TunnelNetworkHelper.startMtProxyScan(
+                            TgonpcNetworkHelper.startMtProxyScan(
                                 getApplicationContext(), batch, 4000
                             );
-                            android.util.Log.i("TGTunnel", "MTProxy scan started");
+                            android.util.Log.i("TGonPC", "MTProxy scan started");
                         }
                     } else {
                         maybeRescanMtProxy(mod);
@@ -109,31 +109,31 @@ public class TunnelService extends Service {
                     if (bridgeNotReadySince == 0L) {
                         bridgeNotReadySince = now;
                     } else if (now - bridgeNotReadySince > 15000L) {
-                        android.util.Log.w("TGTunnel", "bridge not ready 15s, restart once");
+                        android.util.Log.w("TGonPC", "bridge not ready 15s, restart once");
                         bridgeNotReadySince = now;
                         exitProbeRequested = false;
-                        new Thread(this::startBridgeBlocking, "TGTunnel-restart").start();
+                        new Thread(this::startBridgeBlocking, "TGonPC-restart").start();
                     }
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 break;
             } catch (Exception e) {
-                android.util.Log.w("TGTunnel", "watchBridge", e);
+                android.util.Log.w("TGonPC", "watchBridge", e);
             }
         }
     }
 
     private void maybeRescanMtProxy(com.chaquo.python.PyObject mod) {
         try {
-            String found = TunnelNetworkHelper.getMtProxyFound();
+            String found = TgonpcNetworkHelper.getMtProxyFound();
             if (found != null && !found.isEmpty()) {
                 return;
             }
-            if (TunnelNetworkHelper.isMtProxyScanRunning()) {
+            if (TgonpcNetworkHelper.isMtProxyScanRunning()) {
                 return;
             }
-            String prog = TunnelNetworkHelper.getMtProxyProgress();
+            String prog = TgonpcNetworkHelper.getMtProxyProgress();
             if (prog == null || !prog.contains("не найден")) {
                 return;
             }
@@ -144,29 +144,29 @@ public class TunnelService extends Service {
             nextMtRescanAt = now + 45000L;
             String batch = mod.callAttr("get_mtproxy_batch").toString();
             if (batch != null && !batch.isEmpty()) {
-                TunnelNetworkHelper.startMtProxyScan(getApplicationContext(), batch, 4000);
-                android.util.Log.i("TGTunnel", "MTProxy rescan");
+                TgonpcNetworkHelper.startMtProxyScan(getApplicationContext(), batch, 4000);
+                android.util.Log.i("TGonPC", "MTProxy rescan");
             }
         } catch (Exception e) {
-            android.util.Log.w("TGTunnel", "mtproxy rescan", e);
+            android.util.Log.w("TGonPC", "mtproxy rescan", e);
         }
     }
 
     private void syncMtProxyState(com.chaquo.python.PyObject mod) {
         try {
-            String found = TunnelNetworkHelper.getMtProxyFound();
+            String found = TgonpcNetworkHelper.getMtProxyFound();
             if (found != null && !found.isEmpty()) {
                 mod.callAttr("apply_mtproxy_found", found);
             }
             mod.callAttr("sync_from_java");
         } catch (Exception e) {
-            android.util.Log.w("TGTunnel", "syncMtProxy", e);
+            android.util.Log.w("TGonPC", "syncMtProxy", e);
         }
     }
 
     private void updateNotificationProgress() {
         try {
-            String prog = TunnelNetworkHelper.getMtProxyProgress();
+            String prog = TgonpcNetworkHelper.getMtProxyProgress();
             if (prog == null || prog.isEmpty()) {
                 ensurePython();
                 prog = Python.getInstance().getModule("mobile_entry")
@@ -189,7 +189,7 @@ public class TunnelService extends Service {
             ensurePython();
             Python.getInstance().getModule("mobile_entry").callAttr("start_bridge_sync", 180.0);
         } catch (Exception e) {
-            android.util.Log.e("TGTunnel", "bridge start", e);
+            android.util.Log.e("TGonPC", "bridge start", e);
             bridgeStartRequested = false;
         }
     }
@@ -214,7 +214,7 @@ public class TunnelService extends Service {
     @Override
     public void onDestroy() {
         stopBridgeAsync();
-        TunnelNetworkHelper.stop(getApplicationContext());
+        TgonpcNetworkHelper.stop(getApplicationContext());
         releaseWakeLock();
         super.onDestroy();
     }
@@ -232,7 +232,7 @@ public class TunnelService extends Service {
         if (pm == null) {
             return;
         }
-        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "TGTunnel::Tunnel");
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "TGonPC::Bridge");
         wakeLock.setReferenceCounted(false);
         wakeLock.acquire();
     }

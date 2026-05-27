@@ -14,7 +14,7 @@ def apply_telegram_proxy(host: str = "127.0.0.1", port: int = 1080) -> None:
     Один клик «Подключить», без ручного ввода host/port.
     """
     link = f"tg://socks?server={host}&port={port}"
-    log.info("Открываем %s", link)
+    log.status("Открываем %s", link)
     if _open_telegram_proxy_android(link):
         return
     try:

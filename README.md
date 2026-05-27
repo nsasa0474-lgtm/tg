@@ -1,109 +1,131 @@
-# TG — свой мост для Telegram в РФ
+# TGonPC (tgonpc)
 
-## Что использовать
+Локальный обход блокировок Telegram на ПК и Android: SOCKS5 `127.0.0.1:1080` → MTProto через WebSocket (HTTPS) или MTProxy. Это **не VPN-туннель** — трафик идёт только в Telegram, системный прокси по умолчанию не трогаем.
 
-**`tg_bridge`** — локальный SOCKS5, который гонит MTProto через **WebSocket (HTTPS)** на `kws*.web.telegram.org` через рабочий relay **`149.154.167.220`**.
-
-У многих провайдеров режут прямой TCP к `149.154.175.*`, но TLS к `.167.220` проходит.
-
-**`tg_dpi`** (WinDivert) — только если TCP до DC доступен (`python -m tg_dpi probe` показывает OK). При полной блокировке IP не поможет.
+Репозиторий: [github.com/nsasa0474-lgtm/tg](https://github.com/nsasa0474-lgtm/tg)
 
 ---
 
-## Один файл для любого ПК (без Python)
+## Что в репозитории, а что нет
 
-На машине, где есть исходники:
+В git только **исходники** (~150 файлов). Не залиты (ставятся локально):
 
-```text
+| Папка / файл | Зачем |
+|--------------|--------|
+| `venv/` | Python-зависимости |
+| `.tools/` | встроенный Python для скриптов (опционально) |
+| `.android-sdk/` | SDK для сборки APK |
+| `dist/`, `build/` | `tgonpc.exe` и артефакты сборки |
+| `logs/` | логи запуска |
+
+---
+
+## Быстрый старт после клонирования (Windows)
+
+```powershell
+git clone https://github.com/nsasa0474-lgtm/tg.git
+cd tg
+
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+
+python run.py
+```
+
+При запросе UAC нажмите **Да** (нужно для автонастройки Telegram). В Telegram — **«Подключить»** (SOCKS5 `127.0.0.1:1080`).
+
+Альтернатива с правами админа:
+
+```powershell
+.\scripts\run-pc-admin.ps1
+```
+
+Остановка: `Ctrl+C` — системный прокси Windows (если включали) восстанавливается.
+
+### Проверка без UAC
+
+```powershell
+python run.py --no-uac
+```
+
+В Telegram включите прокси вручную: SOCKS5 `127.0.0.1:1080`.
+
+---
+
+## Модули
+
+**`tg_bridge`** — основной обход: SOCKS5 → WebSocket на `kws*.web.telegram.org` через relay `149.154.167.220`.
+
+**`tg_dpi`** (WinDivert) — только если TCP до DC доступен (`python -m tg_dpi probe` → OK). При полной блокировке IP не поможет.
+
+```powershell
+pip install -r requirements.txt
+python -m tg_dpi check
+python -m tg_dpi start --strategy combo
+```
+
+Нужны права администратора.
+
+---
+
+## Сборка одного EXE (на своей машине)
+
+```powershell
+pip install -r requirements-build.txt
 python build.py
 ```
 
-или двойной клик: `scripts\build.bat`
-
-Готовый файл: **`dist\TGTunnel.exe`** (~13 MB). Скопируйте на флешку/USB — на другом Windows запустите двойным кликом. Python ставить не нужно.
-
-При первом запуске в Telegram нажмите **«Подключить»** (прокси `127.0.0.1:1080` сохранится в приложении).
-
-Флаги (как у `run.py`):
+или `scripts\build.bat` → **`dist\tgonpc.exe`** (~13 MB). На другом ПК: скопировать и запустить, Python не нужен.
 
 ```text
-TGTunnel.exe --no-browser
-TGTunnel.exe --no-tg-link
-TGTunnel.exe --lan
-TGTunnel.exe -v
+tgonpc.exe --no-browser
+tgonpc.exe --no-tg-link
+tgonpc.exe --lan
+tgonpc.exe -v
+tgonpc.exe --system-proxy
+tgonpc.exe --zapret
 ```
+
+Готовый exe в репозитории **не хранится** — соберите сами.
 
 ---
 
-## Быстрый старт (из исходников)
+## Режим `pc` (по умолчанию)
+
+1. **SOCKS5** `127.0.0.1:1080` — только для Telegram (`tg://socks`).
+2. **Системный прокси Windows выключен** — не ломает «Запрет», YouTube, Discord.
+3. Прокси на весь ПК: `tgonpc.exe --system-proxy` или `python run.py --system-proxy`.
+4. **NAT** (`--nat`) — редко, может конфликтовать с WinDivert у «Запрета».
+
+### Telegram на телефоне в Wi‑Fi
+
+1. На ПК: `tgonpc.exe --lan` или `python run.py --lan`.
+2. IP ПК: `ipconfig` → IPv4, например `192.168.1.50`.
+3. Телефон в той же Wi‑Fi.
+4. Telegram → Прокси → SOCKS5 → `192.168.1.50:1080`.
+
+ПК должен быть включён, TGonPC запущен. Через 4G без ПК не работает.
+
+### Termux на Android
+
+[Termux](https://termux.org) → `pkg install python`, скопировать проект, `pip install -r requirements.txt`, `python run.py` → SOCKS5 `127.0.0.1:1080`.
+
+### APK (отдельное приложение)
+
+Сборка и установка: **`android/README.md`**. На телефоне: **Запустить обход** → **Настроить Telegram** → «Подключить».
+
+---
+
+## Совместимость с «Запрет»
 
 ```powershell
-cd d:\TG
-pip install -r requirements.txt
+.\scripts\run-zapret-friendly.bat
 ```
 
-**Run `run.py`** — при запросе UAC нажмите **Да** (нужно для Telegram без настроек).
+или `tgonpc.exe --zapret`
 
-Или: `.\scripts\run-pc-admin.ps1`
-
-### Что делает режим `pc` (по умолчанию)
-
-1. **SOCKS5** `127.0.0.1:1080` — только для Telegram (через tg://).
-2. **Системный прокси Windows выключен** — не ломает «Запрет», YouTube, Discord.
-3. **tg://socks** — один клик «Подключить» в Telegram.
-4. Прокси на весь ПК: `TGTunnel.exe --system-proxy`.
-5. **NAT** (редко): `--nat` — конфликт с WinDivert у «Запрета».
-
-### Telegram на телефоне (Android / iPhone)
-
-**Вариант 1 — через ПК в Wi‑Fi (проще всего):**
-
-1. На ПК: `TGTunnel.exe --lan` (слушает `0.0.0.0:1080`).
-2. Узнайте IP ПК в сети: `ipconfig` → IPv4, например `192.168.1.50`.
-3. Телефон в **той же Wi‑Fi**, мобильный интернет выключите или не используйте.
-4. Telegram → Настройки → Прокси → SOCKS5 → `192.168.1.50:1080`.
-
-ПК должен быть включён, туннель запущен. Через мобильную сеть (4G) так не работает — только пока телефон ходит через ваш домашний ПК.
-
-**Вариант 2 — мост прямо на Android (Termux):**
-
-Установить [Termux](https://termux.org), `pkg install python`, скопировать проект, `pip install -r requirements.txt`, `python run.py`. В Telegram: SOCKS5 `127.0.0.1:1080`. Работает в мобильной сети, если relay `149.154.167.220` доступен с телефона.
-
-### Отдельное приложение на телефон (APK)
-
-В репозитории есть **мобильная оболочка** (`mobile_app/`) + тот же `tg_bridge` внутри.
-
-- Сборка: **`android/README.md`** (Linux / WSL, `buildozer android debug`).
-- На телефоне: установить APK → **Запустить туннель** → **Настроить Telegram** → «Подключить».
-
-Это не exe, а **свой установщик (.apk)** с кнопкой старта, как вы просили.
-
-### Совместимость с «Запрет» (YouTube / Discord)
-
-```text
-TGTunnel.exe --zapret
-```
-
-или `scripts\run-zapret-friendly.bat`
-
-Порядок: сначала **Запрет**, потом **TG Tunnel**. В Telegram — SOCKS `127.0.0.1:1080` (через «Подключить»).
-
-**Не трогаем:** файлы Запрета, DNS, hosts, драйверы (кроме `--nat`). Меняем только реестр **системного прокси**, и только если включён `--system-proxy`.
-
-### Telegram
-
-- После «Подключить» через tg:// прокси **остаётся включённым** — не отключайте в настройках.
-- «Использовать системные настройки прокси» на Windows **обычно не работает** для Desktop.
-
-### Другие режимы
-
-| Режим | Команда |
-|-------|---------|
-| pc (по умолчанию) | `run.py` |
-| только SOCKS вручную | `run.py --mode socks` |
-| без UAC | `run.py --no-uac` (только системный прокси, в TG — «системные настройки») |
-
-`Ctrl+C` — системный прокси Windows восстанавливается.
+Порядок: сначала **Запрет**, потом **TGonPC**. В Telegram — SOCKS `127.0.0.1:1080`.
 
 ---
 
@@ -119,11 +141,14 @@ python -m tg_bridge --relay-ip 149.154.167.220
 ## Структура
 
 ```text
-tg_bridge/     — SOCKS5 → WebSocket (основное решение)
+tg_bridge/     — SOCKS5 → WebSocket (основной обход)
 tg_dpi/        — обход DPI пакетами (если IP не заблокирован)
-run.py         — запуск моста
+run.py         — запуск на ПК
+android-app/   — нативное Android-приложение (Gradle)
+mobile_app/    — Kivy-оболочка (buildozer)
+scripts/       — run, сборка, sync
 ```
 
 ## Лицензия
 
-MIT. Идеи протокола: публичные описания MTProto/WebSocket relay (tg-proxy, tg-ws-proxy).
+MIT. Идеи протокола: публичные описания MTProto/WebSocket relay.

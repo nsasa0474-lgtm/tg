@@ -1,154 +1,189 @@
 # TGonPC (tgonpc)
 
-Локальный обход блокировок Telegram на ПК и Android: SOCKS5 `127.0.0.1:1080` → MTProto через WebSocket (HTTPS) или MTProxy. Это **не VPN-туннель** — трафик идёт только в Telegram, системный прокси по умолчанию не трогаем.
+Обход блокировок **Telegram на Windows**: программа поднимает локальный SOCKS5 `127.0.0.1:1080`, Telegram ходит через него. Это **не VPN** — в обход идёт только Telegram, остальные сайты не трогаем.
 
 Репозиторий: [github.com/nsasa0474-lgtm/tg](https://github.com/nsasa0474-lgtm/tg)
 
 ---
 
-## Что в репозитории, а что нет
+## Запуск для новичка (Windows, по шагам)
 
-В git только **исходники** (~150 файлов). Не залиты (ставятся локально):
+Нужно: **Windows 10/11**, интернет, **Telegram Desktop** на этом же ПК.
 
-| Папка / файл | Зачем |
-|--------------|--------|
-| `venv/` | Python-зависимости |
-| `.tools/` | встроенный Python для скриптов (опционально) |
-| `.android-sdk/` | SDK для сборки APK |
-| `dist/`, `build/` | `tgonpc.exe` и артефакты сборки |
-| `logs/` | логи запуска |
+### 1. Скачать проект
 
----
+**Без программистских утилит (проще всего):**
 
-## Быстрый старт после клонирования (Windows)
+1. Откройте [github.com/nsasa0474-lgtm/tg](https://github.com/nsasa0474-lgtm/tg)
+2. Зелёная кнопка **Code** → **Download ZIP**
+3. Распакуйте архив, например в `C:\tg`  
+   Внутри должны быть файлы `ЗАПУСК.bat`, `УСТАНОВИТЬ.bat`, `run.py`.
+
+**Через git** (если уже установлен):
 
 ```powershell
 git clone https://github.com/nsasa0474-lgtm/tg.git
 cd tg
+```
 
+### 2. Установить Python (один раз на компьютер)
+
+Если Python ещё не ставили:
+
+1. [python.org/downloads](https://www.python.org/downloads/) → скачать **Python 3.11** или **3.12**
+2. В установщике внизу **обязательно** включить:  
+   **`Add python.exe to PATH`** (или «Добавить Python в PATH»)
+3. **Install Now**, дождаться конца
+
+Проверка: `Win + R` → `cmd` → Enter → в чёрном окне:
+
+```text
+python --version
+```
+
+Должно показать `Python 3.11` или `3.12`. Если «не является внутренней командой» — Python не в PATH, переустановите с галочкой PATH.
+
+### 3. Установить TGonPC (один раз в папке проекта)
+
+В папке с проектом **дважды щёлкните** `УСТАНОВИТЬ.bat`.
+
+- Подождите 1–2 минуты (скачиваются библиотеки)
+- В конце должно быть **«Готово!»**
+- Если пишет «Python не найден» — вернитесь к шагу 2
+
+### 4. Запустить обход
+
+**Дважды щёлкните** `ЗАПУСК.bat`.
+
+1. Windows спросит права администратора → **Да** (нужно, чтобы Telegram сам подключил прокси)
+2. Появится чёрное окно — **не закрывайте**, пока пользуетесь Telegram
+3. Откроется Telegram (или откройте сами)
+4. Если всплывёт **«Подключить»** к прокси → нажмите **Подключить**
+
+Готово: Telegram должен работать, пока окно TGonPC открыто.
+
+**Остановка:** закройте чёрное окно или нажмите в нём `Ctrl + C`.
+
+### 5. Если «Подключить» не появилось
+
+В Telegram Desktop:
+
+1. **Настройки** → **Данные и память** → **Тип прокси**
+2. Включить прокси → **SOCKS5**
+3. Сервер: `127.0.0.1` (именно так, не `localhost`)
+4. Порт: `1080`
+5. Логин и пароль — **пусто**
+
+Снова запустите `ЗАПУСК.bat` и не закрывайте окно программы.
+
+---
+
+## Частые проблемы
+
+| Симптом | Что сделать |
+|--------|-------------|
+| «Python не найден» | Переустановить Python с галочкой **Add to PATH**, снова `УСТАНОВИТЬ.bat` |
+| Сначала не запускали установку | Сначала `УСТАНОВИТЬ.bat`, потом `ЗАПУСК.bat` |
+| Telegram не подключается | Прокси вручную: SOCKS5 `127.0.0.1:1080`, окно TGonPC должно быть открыто |
+| Окно сразу закрылось | Запустите `ЗАПУСК.bat` из папки проекта; прочитайте текст ошибки |
+| Антивирус блокирует | Разрешите `python.exe` / папку проекта (нужен доступ к сети) |
+| Нужен «Запрет» для YouTube | Сначала Запрет, потом TGonPC: `scripts\run-zapret-friendly.bat` |
+
+Лог ошибок (если попросят): папка `logs\`, файл `tgonpc.log` (появится после запуска).
+
+---
+
+## Запуск без .bat (если умеете PowerShell)
+
+```powershell
+cd C:\tg
 python -m venv venv
 .\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-
 python run.py
 ```
 
-При запросе UAC нажмите **Да** (нужно для автонастройки Telegram). В Telegram — **«Подключить»** (SOCKS5 `127.0.0.1:1080`).
+UAC → **Да**. В Telegram → **Подключить**.
 
-Альтернатива с правами админа:
+Или: `.\scripts\run-pc-admin.ps1`
 
-```powershell
-.\scripts\run-pc-admin.ps1
-```
-
-Остановка: `Ctrl+C` — системный прокси Windows (если включали) восстанавливается.
-
-### Проверка без UAC
+Без прав админа (прокси в Telegram вручную):
 
 ```powershell
-python run.py --no-uac
+.\venv\Scripts\python.exe run.py --no-uac
 ```
-
-В Telegram включите прокси вручную: SOCKS5 `127.0.0.1:1080`.
 
 ---
 
-## Модули
+## Один файл .exe (без Python на другом ПК)
 
-**`tg_bridge`** — основной обход: SOCKS5 → WebSocket на `kws*.web.telegram.org` через relay `149.154.167.220`.
-
-**`tg_dpi`** (WinDivert) — только если TCP до DC доступен (`python -m tg_dpi probe` → OK). При полной блокировке IP не поможет.
-
-```powershell
-pip install -r requirements.txt
-python -m tg_dpi check
-python -m tg_dpi start --strategy combo
-```
-
-Нужны права администратора.
-
----
-
-## Сборка одного EXE (на своей машине)
+На компьютере, где уже стоит проект и Python:
 
 ```powershell
 pip install -r requirements-build.txt
 python build.py
 ```
 
-или `scripts\build.bat` → **`dist\tgonpc.exe`** (~13 MB). На другом ПК: скопировать и запустить, Python не нужен.
+или двойной клик `scripts\build.bat` → появится **`dist\tgonpc.exe`**.
 
-```text
-tgonpc.exe --no-browser
-tgonpc.exe --no-tg-link
-tgonpc.exe --lan
-tgonpc.exe -v
-tgonpc.exe --system-proxy
-tgonpc.exe --zapret
-```
+Скопируйте **только** `tgonpc.exe` на флешку/другой ПК → запуск двойным щелчком → **Подключить** в Telegram. Python на том ПК не нужен.
 
-Готовый exe в репозитории **не хранится** — соберите сами.
+Готового exe в GitHub **нет** — только исходники.
 
 ---
 
-## Режим `pc` (по умолчанию)
+## Что не скачивается с GitHub
 
-1. **SOCKS5** `127.0.0.1:1080` — только для Telegram (`tg://socks`).
-2. **Системный прокси Windows выключен** — не ломает «Запрет», YouTube, Discord.
-3. Прокси на весь ПК: `tgonpc.exe --system-proxy` или `python run.py --system-proxy`.
-4. **NAT** (`--nat`) — редко, может конфликтовать с WinDivert у «Запрета».
+| Нет в архиве | Появится после |
+|--------------|----------------|
+| `venv/` | `УСТАНОВИТЬ.bat` |
+| `dist\tgonpc.exe` | `build.bat` / `build.py` |
+| `logs/` | первого запуска |
+| Android SDK | сборки APK (см. `android/README.md`) |
 
-### Telegram на телефоне в Wi‑Fi
+---
 
-1. На ПК: `tgonpc.exe --lan` или `python run.py --lan`.
-2. IP ПК: `ipconfig` → IPv4, например `192.168.1.50`.
-3. Телефон в той же Wi‑Fi.
-4. Telegram → Прокси → SOCKS5 → `192.168.1.50:1080`.
+## Как это устроено (кратко)
 
-ПК должен быть включён, TGonPC запущен. Через 4G без ПК не работает.
+**`tg_bridge`** — основной обход: SOCKS5 → WebSocket (HTTPS) к Telegram.
 
-### Termux на Android
+**`tg_dpi`** — дополнительно, только если TCP до серверов Telegram не заблокирован (`python -m tg_dpi probe`). Нужен админ. Обычному пользователю достаточно `ЗАПУСК.bat`.
 
-[Termux](https://termux.org) → `pkg install python`, скопировать проект, `pip install -r requirements.txt`, `python run.py` → SOCKS5 `127.0.0.1:1080`.
+### Телефон в той же Wi‑Fi, что и ПК
 
-### APK (отдельное приложение)
+1. На ПК: `python run.py --lan` или `tgonpc.exe --lan`
+2. `ipconfig` → IPv4 ПК, например `192.168.1.50`
+3. В Telegram на телефоне: SOCKS5 `192.168.1.50:1080`
 
-Сборка и установка: **`android/README.md`**. На телефоне: **Запустить обход** → **Настроить Telegram** → «Подключить».
+### Android (отдельное приложение)
+
+Сборка APK: **`android/README.md`**. На телефоне: **Запустить обход** → **Настроить Telegram**.
 
 ---
 
 ## Совместимость с «Запрет»
 
-```powershell
-.\scripts\run-zapret-friendly.bat
+Сначала запустите **Запрет**, потом TGonPC:
+
+```text
+scripts\run-zapret-friendly.bat
 ```
 
 или `tgonpc.exe --zapret`
 
-Порядок: сначала **Запрет**, потом **TGonPC**. В Telegram — SOCKS `127.0.0.1:1080`.
-
 ---
 
-## CLI
-
-```powershell
-python -m tg_bridge --port 1080 -v
-python -m tg_bridge --relay-ip 149.154.167.220
-```
-
----
-
-## Структура
+## Структура проекта
 
 ```text
-tg_bridge/     — SOCKS5 → WebSocket (основной обход)
-tg_dpi/        — обход DPI пакетами (если IP не заблокирован)
-run.py         — запуск на ПК
-android-app/   — нативное Android-приложение (Gradle)
-mobile_app/    — Kivy-оболочка (buildozer)
-scripts/       — run, сборка, sync
+ЗАПУСК.bat / УСТАНОВИТЬ.bat   — для новичка
+run.py                         — запуск из исходников
+tg_bridge/                     — мост SOCKS5 → Telegram
+tg_dpi/                        — обход DPI (опционально)
+scripts/                       — вспомогательные скрипты
+android-app/                   — приложение для Android
 ```
 
 ## Лицензия
 
-MIT. Идеи протокола: публичные описания MTProto/WebSocket relay.
+MIT.

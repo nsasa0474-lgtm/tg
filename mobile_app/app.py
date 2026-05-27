@@ -19,7 +19,7 @@ BoxLayout:
     spacing: '12dp'
 
     Label:
-        text: 'TGonPC (Android — не работает)'
+        text: 'TGonPC (Android, не работает)'
         font_size: '20sp'
         bold: True
         size_hint_y: None

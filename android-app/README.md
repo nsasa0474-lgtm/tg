@@ -1,6 +1,6 @@
-# android-app — не работает
+# android-app
 
-Мобильная версия TGonPC **в текущем виде нерабочая**. Код для самостоятельной доработки.
+**На Android не работает** — исходники для тех, кто захочет доработать.
 
-Инструкции: [../android/README.md](../android/README.md)  
-Рабочий вариант: **Windows** + **Telegram Desktop** — [../README.md](../README.md)
+- Сборка и детали: [../android/README.md](../android/README.md)
+- Рабочий запуск: [../README.md](../README.md) (Windows + Telegram Desktop)

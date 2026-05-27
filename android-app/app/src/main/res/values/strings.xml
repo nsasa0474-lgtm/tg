@@ -12,7 +12,7 @@
 
     <string name="status_loading">Загрузка…</string>
 
-    <string name="status_idle">Версия для телефона не доведена до рабочего состояния. См. README на GitHub. Для ПК — Telegram Desktop + ЗАПУСК.bat.</string>
+    <string name="status_idle">На телефоне не работает. На ПК: Telegram Desktop и ЗАПУСК.bat — см. README.</string>
 
     <string name="status_starting">Поиск relay Telegram…</string>
 

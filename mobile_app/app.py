@@ -19,8 +19,8 @@ BoxLayout:
     spacing: '12dp'
 
     Label:
-        text: 'TGonPC'
-        font_size: '26sp'
+        text: 'TGonPC (Android — не работает)'
+        font_size: '20sp'
         bold: True
         size_hint_y: None
         height: self.texture_size[1] + '12dp'

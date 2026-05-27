@@ -41,7 +41,16 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--no-uac", action="store_true")
     parser.add_argument("--no-tg-link", action="store_true")
-    parser.add_argument("--no-browser", action="store_true")
+    parser.add_argument(
+        "--no-browser",
+        action="store_true",
+        help="(по умолчанию) не открывать браузер; web.telegram.org не поддерживается",
+    )
+    parser.add_argument(
+        "--browser",
+        action="store_true",
+        help="Попытка открыть web.telegram.org (обычно не работает, только для экспериментов)",
+    )
     parser.add_argument(
         "--system-proxy",
         action="store_true",
@@ -87,6 +96,7 @@ def parse_cli(argv: list[str]) -> ParsedArgs:
         no_tg_link=args.no_tg_link,
         no_browser=args.no_browser,
         zapret=args.zapret,
+        open_browser=getattr(args, "browser", False),
     )
 
     state = RuntimeState(

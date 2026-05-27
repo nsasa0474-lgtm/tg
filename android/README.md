@@ -1,71 +1,65 @@
-# TGonPC для Android (APK)
+# Android / телефон — не работает
 
-Нативное приложение (`android-app/`): кнопка **«Запустить обход»** → тот же мост, что и `tgonpc.exe` на ПК (SOCKS5 `127.0.0.1:1080` → WebSocket MTProto / MTProxy).
+> **Статус: нерабочая заготовка.**  
+> Сборка APK и запуск на телефоне **в текущем репозитории не доведены до результата**.  
+> Если вам нужен рабочий Telegram на телефоне — **используйте Windows-версию** (`ЗАПУСК.bat` + **Telegram Desktop** на ПК), см. корневой `README.md`.
 
-В репозитории **нет** Android SDK и готового APK — собирайте локально.
-
----
-
-## Требования
-
-- **JDK 17** (или 11+)
-- **Android SDK** (через Android Studio или command-line tools)
-- Переменные: `ANDROID_HOME` или `ANDROID_SDK_ROOT`
-- Windows: PowerShell; для buildozer/Kivy — Linux/WSL
-
-SDK в git не входит (см. корневой `README.md`).
+Код оставлен **как есть** — чтобы кто-то мог **сам доработать** (pull request, форк). Ниже — как собрать черновик, без обещания, что заработает.
 
 ---
 
-## Сборка APK (Gradle, рекомендуется)
+## Что есть в репозитории
 
-Из корня репозитория:
+| Папка | Описание |
+|-------|----------|
+| `android-app/` | Gradle + Chaquopy, Java `org.tgonpc.app` |
+| `mobile_app/` | Kivy-оболочка для buildozer |
+| `buildozer.spec` | Сборка APK через buildozer (Linux/WSL) |
+
+**Готового APK на GitHub нет.** Android SDK в git не входит.
+
+---
+
+## Для разработчика: сборка (на свой страх и риск)
+
+### Gradle (Windows)
 
 ```powershell
-git clone https://github.com/nsasa0474-lgtm/tg.git
 cd tg
-
-# Скопировать Python-модуль в android-app
 .\scripts\sync-python-src.ps1
-
 cd android-app
 .\gradlew.bat assembleDebug
 ```
 
 APK: `android-app\app\build\outputs\apk\debug\app-debug.apk`
 
-Или скрипт:
-
-```powershell
-.\scripts\build-apk-native.ps1
-```
-
-→ `dist\tgonpc-android-debug.apk`
-
----
-
-## Сборка через Buildozer (Kivy, Linux/WSL)
+### Buildozer (Linux/WSL)
 
 ```bash
-pip install buildozer cython
 buildozer android debug
 ```
 
-APK: `bin/tgonpc-*-debug.apk`
+---
+
+## Известные проблемы (почему «не получилось»)
+
+- Обход на Android требует VPN/foreground service, сетевых callback и стабильного MTProxy — в текущей сборке это **нестабильно**.
+- На многих операторах LTE обход с телефона **не поднимается** так же, как с ПК.
+- Проект **не поддерживается** автором на Android; issue «не работает на телефоне» ожидаемы.
 
 ---
 
-## Установка и запуск
+## Если дорабатываете
 
-1. Установить APK на телефон.
-2. **Запустить обход** — дождаться ✓ в статусе.
-3. **Настроить Telegram** → «Подключить» (SOCKS5 `127.0.0.1:1080`).
-4. Разрешить уведомления и отключить оптимизацию батареи для TGonPC (иначе Android может остановить обход).
+1. Форк репозитория.
+2. Правки в `android-app/` и `tg_bridge/` (модули `android_java`, `relay_pool`, `TgonpcService`).
+3. Тесты на реальном устройстве (Wi‑Fi и LTE отдельно).
 
-Пока обход работает, не убивайте приложение — держите уведомление TGonPC активным.
+Пакет: `org.tgonpc.app`
 
 ---
 
-## Пакет приложения
+## ПК остаётся единственным поддерживаемым сценарием
 
-`applicationId`: `org.tgonpc.app`
+**Telegram Desktop** на Windows + `ЗАПУСК.bat` / `tgonpc.exe`.  
+**web.telegram.org** и **мобильное приложение TGonPC** — не рабочие варианты сейчас.

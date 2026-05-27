@@ -29,6 +29,19 @@ def test_pc_mode_defaults() -> None:
     assert flags.system_proxy_enabled is False
     assert flags.use_nat is False
     assert flags.auto_tg is True
+    assert flags.auto_browser is False
+
+
+def test_browser_flag_opens_web() -> None:
+    flags = build_mode_flags(
+        "pc",
+        system_proxy=False,
+        nat=False,
+        no_tg_link=False,
+        no_browser=False,
+        zapret=False,
+        open_browser=True,
+    )
     assert flags.auto_browser is True
 
 
